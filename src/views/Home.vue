@@ -17,7 +17,9 @@
           />
         </div>
         <div>
-          <button v-on:click="goNew"><v-icon>mdi-plus</v-icon></button>
+          <button v-on:click="goNew" class="button-go-new-insight">
+            <v-icon>mdi-plus</v-icon>
+          </button>
         </div>
       </section>
       <section class="info-user">
@@ -30,37 +32,41 @@
       </section>
     </header>
 
-    <div class="container-cards">
-      <div v-for="card of cards" :key="card.title">
+    <div v-if="filterCards.length > 0" class="container-cards">
+      <div v-for="card of filterCards" :key="card.id">
         <v-card elevation="4" class="mx-auto">
           <v-card-text>
             <div class="text-card-home">
               {{ card.title }}
             </div>
-            <div v-if="card.category" class="align-categories">
-              <v-btn
-                elevation="2"
-                outlined
+            <div v-if="card.category.length > 0" class="align-categories">
+              <button
                 class="button-category"
                 v-for="category of card.category"
                 :key="category"
               >
                 {{ category }}
-              </v-btn>
+              </button>
             </div>
           </v-card-text>
         </v-card>
       </div>
-
       <div class="get-more-cards">
         <v-icon>mdi-dots-horizontal</v-icon>
         <button>Toque para exibir mais insights</button>
       </div>
     </div>
+    <div v-else class="container-erro-search-insight">
+      Você ainda não teve um insight igual a esse. <br />
+      Que tal publicar um agora?
+      <button class="publish-now" v-on:click="goNewParams">Publicar insight agora</button>
+    </div>
+
     <div class="px-4 search-button">
       <v-text-field
         solo
         hide-details
+        v-model="search"
         label="Pesquise por termos ou categorias..."
         append-icon="mdi-magnify"
       ></v-text-field>
@@ -99,7 +105,7 @@
       width: 56px;
     }
 
-    button > i {
+    .button-go-new-insight > i {
       width: 50px;
       background: transparent;
       border: 0;
@@ -166,11 +172,13 @@
     flex-wrap: wrap;
 
     .button-category {
-      color: $color-pink-800 !important;
-      font-size: 10px !important;
-      padding: 8px !important;
-      height: unset !important;
-      font-weight: $text-extraBold !important;
+      color: $color-pink-800;
+      font-size: 10px;
+      padding: 4px 8px;
+      border: 1px solid $color-pink-800;
+      border-radius: 4px;
+      /* height: ; */
+      font-weight: $text-extraBold;
     }
   }
 
@@ -182,6 +190,26 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+  }
+}
+
+.container-erro-search-insight {
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  .publish-now {
+    width: 90%;
+    color: #fff;
+    background-color: #ed4d77;
+    border-radius: 4px;
+    margin-top: 16px;
+    padding: 8px;
   }
 }
 
@@ -208,21 +236,42 @@ import GetCards from "../services/requestCards";
 
 export default {
   name: "Home",
-  methods: {
-    goNew: function (event) {
-      this.$router.push({ path: "/new" });
-      return this.$router.go();
-    },
-  },
   data() {
     return {
       cards: [{}],
+      filterCards: [{}],
+      search: "",
     };
+  },
+  methods: {
+    goNew: function () {
+      this.$router.push({ path: "/new" });
+      return this.$router.go();
+    },
+    goNewParams: function () {
+      this.$router.push({ path: `/new/${this.search}`});
+      return this.$router.go();
+    },
+  },
+  watch: {
+    search(newValue, oldValue) {
+      let serchComplete = [];
+      serchComplete = this.cards.filter((card) => {
+        let string = JSON.stringify(card.category);
+        return (
+          string.toLowerCase().match(newValue) ||
+          card.title.toLowerCase().includes(newValue)
+        );
+      });
+
+      this.filterCards = serchComplete;
+      return;
+    },
   },
   mounted() {
     GetCards.get().then((res) => {
       this.cards = res.data;
-      console.log(res.data);
+      this.filterCards = res.data;
     });
   },
 };

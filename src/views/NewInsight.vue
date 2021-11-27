@@ -1,7 +1,7 @@
 <template>
   <fragment>
     <header class="header-new">
-      <button v-on:click="goHome"><v-icon>mdi-arrow-left</v-icon></button>
+      <button v-on:click="goHome" class="button-go-back"><v-icon>mdi-arrow-left</v-icon></button>
       <div>
         CRIAR<br />
         <strong>INSIGHTS</strong>
@@ -74,7 +74,7 @@
   justify-content: space-between;
   align-items: center;
 
-  button > i {
+  .button-go-back > i {
     color: $color-pink-800 !important;
     font-size: 24px;
   }
@@ -131,7 +131,7 @@ export default {
   name: "NewInsight",
   data() {
     return {
-      insightText: "",
+      insightText: this.$route.params.title || ``,
       categoriesName: [],
       categories: [{}],
       value: [],
@@ -160,12 +160,13 @@ export default {
         let uppercase = item.name.toUpperCase();
         categoriesName.push(uppercase);
       });
+      console.log(this.$route.params.title)
       return;
     },
   },
   computed: {
     enableButton() {
-      return this.insightText !== "" && this.insightText.length < 400;
+      return this.insightText !== "" && this.insightText.length <= 400;
     },
   },
   mounted() {
