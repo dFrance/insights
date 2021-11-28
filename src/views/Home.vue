@@ -1,14 +1,7 @@
 <template>
   <fragment>
     <header class="header">
-      <div v-if="loading" class="loading-page">
-        <v-progress-circular
-          indeterminate
-          size="70"
-          width="7"
-          class="loading-icon"
-        ></v-progress-circular>
-      </div>
+      <LoadingIcon :status="loading" :size="70" :width="7" :loadingPage="true" />
       <section class="actions">
         <div>
           <img
@@ -46,12 +39,7 @@
       <button class="publish-now" v-on:click="tryRequestAgain">
         Reconectar
       </button>
-      <div v-if="loadingTryRequest">
-        <v-progress-circular
-          indeterminate
-          class="loading-icon"
-        ></v-progress-circular>
-      </div>
+      <LoadingIcon :status="loadingTryRequest" :size="70" :width="7"/>
     </div>
     <div
       v-else-if="filterCards && filterCards.length > 0"
@@ -69,16 +57,17 @@
                 v-for="category of card.category"
                 :key="category"
               >
-                {{ category }}
+                {{ category.title }}
               </button>
             </div>
           </v-card-text>
         </v-card>
       </div>
       <div class="get-more-cards">
+        <LoadingIcon :status="loadingTryRequest" />
         <v-icon>mdi-dots-horizontal</v-icon>
-        <button v-if="noMoreItemToLoad" disabled v-on:click="loadingMoreItems">
-            Não existem mais posts para serem carregados.
+        <button v-if="noMoreItemToLoad" disabled>
+          Não existem mais posts para serem carregados.
         </button>
         <button v-else v-on:click="loadingMoreItems">
           Toque para exibir mais insights
@@ -86,8 +75,12 @@
       </div>
     </div>
     <div v-else class="container-erro-search-insight">
-      Você ainda não teve um insight igual a esse. <br />
-      Que tal publicar um agora?
+      {{cards.length === 0 ?
+      "Você ainda não publicou nenhum insight."
+      :
+      "Você ainda não teve um insight igual a esse."
+      }}
+      <br/>Que tal publicar um agora?
       <button class="publish-now" v-on:click="goNewParams">
         Publicar insight agora
       </button>
@@ -107,21 +100,6 @@
 
 <style lang="scss">
 @import "../styles/style.base.scss";
-.loading-page {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 999;
-
-  width: 100%;
-  height: 100%;
-
-  background-color: rgba(255, 255, 255, 0.4);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
 .loading-icon {
   color: $color-pink-800 !important;
@@ -247,7 +225,7 @@
 .container-erro-search-insight {
   width: 100%;
   max-width: 350px;
-  margin: 0 auto;
+  margin: 32px auto 0;
   display: flex;
   justify-content: center;
   flex-direction: column;
@@ -284,9 +262,11 @@
 
 <script>
 import GetCards from "../services/requestCards";
+import LoadingIcon from "../components/LoadingIcon";
 
 export default {
   name: "Home",
+  components: { LoadingIcon },
   data() {
     return {
       currentPage: 1,
@@ -321,9 +301,10 @@ export default {
     },
     loadingMoreItems: function () {
       this.loadingTryRequest = true;
-      GetCards.get(this.currentPage + 1)
+      GetCards.get(this.currentPage + 1, 4)
         .then((res) => {
-          if(res.data.length <= 1) {
+          console.log(res);
+          if (res.data.length <= 3) {
             this.noMoreItemToLoad = true;
           }
           let newPagination = [...this.cards, ...res.data];
@@ -341,8 +322,8 @@ export default {
       serchComplete = this.cards.filter((card) => {
         let string = JSON.stringify(card.category);
         return (
-          string.toLowerCase().match(newValue) ||
-          card.title.toLowerCase().includes(newValue)
+          string.toLowerCase().match(newValue.toLowerCase()) ||
+          card.title.toLowerCase().includes(newValue.toLowerCase())
         );
       });
 
@@ -351,12 +332,13 @@ export default {
     },
   },
   mounted() {
-    GetCards.get(this.currentPage)
+    GetCards.get(this.currentPage, 4)
       .then((res) => {
         this.requestFailed = false;
         this.cards = res.data;
         this.filterCards = res.data;
         this.loading = false;
+        console.log(res);
       })
       .catch(() => (this.loading = false), (this.requestFailed = true));
   },

@@ -1,7 +1,21 @@
 <template>
   <fragment>
+    <v-snackbar
+      :timeout="2000"
+      :value="toaster.status"
+      :color="toaster.code"
+      right
+      top
+    >
+      <v-icon>{{
+        toaster.code === "success" ? "mdi-check-circle" : "mdi-alert-circle"
+      }}</v-icon>
+      {{ toaster.message }}
+    </v-snackbar>
     <header class="header-new">
-      <button v-on:click="goHome" class="button-go-back"><v-icon>mdi-arrow-left</v-icon></button>
+      <button v-on:click="goHome" class="button-go-back">
+        <v-icon>mdi-arrow-left</v-icon>
+      </button>
       <div>
         CRIAR<br />
         <strong>INSIGHTS</strong>
@@ -28,7 +42,9 @@
             <v-select
               name="categories"
               v-model="value"
-              :items="categoriesName"
+              :items="categories"
+              item-text="title"
+              return-object
               item-color="#ED4D77"
               attach
               chips
@@ -45,14 +61,17 @@
                   @click="select"
                   @click:close="remove(item)"
                 >
-                  {{ item }}
+                  {{ item.title }}
                 </v-chip>
               </template>
             </v-select>
           </div>
         </v-card-text>
       </v-card>
-      <v-btn v-if="enableButton" class="btn-publish" v-on:click="publish">Publicar</v-btn>
+      <LoadingIcon :status="loadingTryRequest" :size="70" :width="8"/>
+      <v-btn v-if="enableButton" class="btn-publish" v-on:click="publish"
+        >Publicar</v-btn
+      >
       <v-btn v-else disabled class="btn-publish">Publicar</v-btn>
     </div>
   </fragment>
@@ -60,6 +79,7 @@
 
 <style lang="scss">
 @import "../styles/style.base.scss";
+
 .header-new {
   background: url("../assets/images/background.svg") 0 bottom no-repeat;
   background-size: cover;
@@ -106,7 +126,7 @@
     font-weight: $text-bold;
     color: $color-pink-800 !important;
   }
-  .v-list-item__title{
+  .v-list-item__title {
     font-size: 12px !important;
     color: $color-pink-800 !important;
   }
@@ -126,42 +146,64 @@
 <script>
 import GetCategories from "../services/requestCategory";
 import PostInsight from "../services/requestCards";
+import LoadingIcon from "../components/LoadingIcon"
 
 export default {
   name: "NewInsight",
+  components: {LoadingIcon},
   data() {
     return {
       insightText: this.$route.params.title || ``,
       categoriesName: [],
-      categories: [{}],
+      categories: [],
       value: [],
-      insight: [{
-        insightTitle: '',
-        categories: []
-      }]
+      loadingTryRequest: false,
+      toaster: { status: false, code: "" },
+      insight: [
+        {
+          insightTitle: "",
+          categories: [{}],
+        },
+      ],
     };
   },
   methods: {
     goHome: function () {
-      this.$router.push({path: '/'})
-      return this.$router.go() 
+      this.$router.push({ path: "/" });
+      return this.$router.go();
     },
-    async publish(){
-      let data = {id: +new Date(),title: this.insightText, category: this.value, tagExist: this.value.length > 0 ? true : false};
-      let result = await PostInsight.post(data)
-      console.log(result)
+    async publish() {
+      this.loadingTryRequest = true;
+      let data = { title: this.insightText, category: this.value };
+      await PostInsight.post(data)
+        .then(() => {
+          this.insightText = "";
+          this.value = [];
+          this.toaster = {
+            status: true,
+            code: "success",
+            message: "Insight publicado com sucesso!",
+          };
+          setTimeout(() => {
+            this.toaster = { status: false, message: "", code: "" };
+          }, 2500);
+        })
+        .catch(() => {
+          this.toaster = {
+            status: true,
+            code: "error",
+            message: "Ocorreu um problema ao publicar seu insight!",
+          };
+          setTimeout(() => {
+            this.toaster = { status: false, message: "", code: "" };
+          }, 2500);
+        });
+      this.loadingTryRequest = false;
     },
     remove(item) {
-      this.categoriesName.splice(this.categoriesName.indexOf(item), 1);
-      this.categoriesName = [...this.categoriesName];
-    },
-    filterCategories: function (categories, categoriesName) {
-      categories.forEach((item) => {
-        let uppercase = item.name.toUpperCase();
-        categoriesName.push(uppercase);
-      });
-      console.log(this.$route.params.title)
-      return;
+      console.log(this.value);
+      this.value.splice(this.value.indexOf(item), 1);
+      this.value = [...this.value];
     },
   },
   computed: {
@@ -172,7 +214,6 @@ export default {
   mounted() {
     GetCategories.get().then((res) => {
       this.categories = res.data;
-      this.filterCategories(this.categories, this.categoriesName);
     });
   },
 };

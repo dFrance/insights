@@ -1,8 +1,8 @@
 import { api } from './api';
 
 export default {
-    get:(page) => {
-        return api.get(`/cards?_page=${page}&_limit=4`)
+    get:(page, limit) => {
+        return api.get(`/cards?page=${page}&limit=${limit}`)
     },
     post:(data) => {
         return api.post('/cards', data)
