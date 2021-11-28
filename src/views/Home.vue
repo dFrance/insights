@@ -1,6 +1,14 @@
 <template>
   <fragment>
     <header class="header">
+      <div v-if="loading" class="loading-page">
+        <v-progress-circular
+          indeterminate
+          size="70"
+          width="7"
+          class="loading-icon"
+        ></v-progress-circular>
+      </div>
       <section class="actions">
         <div>
           <img
@@ -32,7 +40,23 @@
       </section>
     </header>
 
-    <div v-if="filterCards.length > 0" class="container-cards">
+    <div v-if="requestFailed" class="container-erro-search-insight">
+      Tivemos um problema com a conexão.<br />
+      Clique embaixo para tentar reconectar!
+      <button class="publish-now" v-on:click="tryRequestAgain">
+        Reconectar
+      </button>
+      <div v-if="loadingTryReconnectAgain">
+        <v-progress-circular
+          indeterminate
+          class="loading-icon"
+        ></v-progress-circular>
+      </div>
+    </div>
+    <div
+      v-else-if="filterCards && filterCards.length > 0"
+      class="container-cards"
+    >
       <div v-for="card of filterCards" :key="card.id">
         <v-card elevation="4" class="mx-auto">
           <v-card-text>
@@ -59,7 +83,9 @@
     <div v-else class="container-erro-search-insight">
       Você ainda não teve um insight igual a esse. <br />
       Que tal publicar um agora?
-      <button class="publish-now" v-on:click="goNewParams">Publicar insight agora</button>
+      <button class="publish-now" v-on:click="goNewParams">
+        Publicar insight agora
+      </button>
     </div>
 
     <div class="px-4 search-button">
@@ -76,6 +102,26 @@
 
 <style lang="scss">
 @import "../styles/style.base.scss";
+.loading-page {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 999;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: rgba(255, 255, 255, 0.4);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loading-icon {
+  color: $color-pink-800 !important;
+}
+
 .header {
   background: url("../assets/images/background.svg") 0 -90px no-repeat;
   background-size: cover;
@@ -93,7 +139,7 @@
     justify-content: space-between;
     align-items: center;
 
-    z-index: 999;
+    z-index: 99;
 
     .logo {
       width: 50px;
@@ -208,7 +254,7 @@
     color: #fff;
     background-color: #ed4d77;
     border-radius: 4px;
-    margin-top: 16px;
+    margin: 16px 0;
     padding: 8px;
   }
 }
@@ -238,9 +284,12 @@ export default {
   name: "Home",
   data() {
     return {
-      cards: [{}],
-      filterCards: [{}],
+      cards: [{ title: "", category: [""] }],
+      filterCards: [],
       search: "",
+      requestFailed: false,
+      loading: true,
+      loadingTryReconnectAgain: false,
     };
   },
   methods: {
@@ -249,8 +298,19 @@ export default {
       return this.$router.go();
     },
     goNewParams: function () {
-      this.$router.push({ path: `/new/${this.search}`});
+      this.$router.push({ path: `/new/${this.search}` });
       return this.$router.go();
+    },
+    tryRequestAgain: function () {
+      this.loadingTryReconnectAgain = true;
+      GetCards.get()
+        .then((res) => {
+          this.cards = res.data;
+          this.filterCards = res.data;
+          this.loadingTryReconnectAgain = false;
+          this.$router.go();
+        })
+        .catch((err) => (this.loadingTryReconnectAgain = false));
     },
   },
   watch: {
@@ -269,10 +329,14 @@ export default {
     },
   },
   mounted() {
-    GetCards.get().then((res) => {
-      this.cards = res.data;
-      this.filterCards = res.data;
-    });
+    GetCards.get()
+      .then((res) => {
+        this.requestFailed = false;
+        this.cards = res.data;
+        this.filterCards = res.data;
+        this.loading = false;
+      })
+      .catch(() => (this.loading = false), (this.requestFailed = true));
   },
 };
 </script>
