@@ -46,7 +46,7 @@
       <button class="publish-now" v-on:click="tryRequestAgain">
         Reconectar
       </button>
-      <div v-if="loadingTryReconnectAgain">
+      <div v-if="loadingTryRequest">
         <v-progress-circular
           indeterminate
           class="loading-icon"
@@ -77,7 +77,12 @@
       </div>
       <div class="get-more-cards">
         <v-icon>mdi-dots-horizontal</v-icon>
-        <button>Toque para exibir mais insights</button>
+        <button v-if="noMoreItemToLoad" disabled v-on:click="loadingMoreItems">
+            Não existem mais posts para serem carregados.
+        </button>
+        <button v-else v-on:click="loadingMoreItems">
+          Toque para exibir mais insights
+        </button>
       </div>
     </div>
     <div v-else class="container-erro-search-insight">
@@ -284,12 +289,14 @@ export default {
   name: "Home",
   data() {
     return {
+      currentPage: 1,
       cards: [{ title: "", category: [""] }],
       filterCards: [],
       search: "",
       requestFailed: false,
       loading: true,
-      loadingTryReconnectAgain: false,
+      loadingTryRequest: false,
+      noMoreItemToLoad: false,
     };
   },
   methods: {
@@ -302,15 +309,30 @@ export default {
       return this.$router.go();
     },
     tryRequestAgain: function () {
-      this.loadingTryReconnectAgain = true;
+      this.loadingTryRequest = true;
       GetCards.get()
         .then((res) => {
           this.cards = res.data;
           this.filterCards = res.data;
-          this.loadingTryReconnectAgain = false;
+          this.loadingTryRequest = false;
           this.$router.go();
         })
-        .catch((err) => (this.loadingTryReconnectAgain = false));
+        .catch((err) => (this.loadingTryRequest = false));
+    },
+    loadingMoreItems: function () {
+      this.loadingTryRequest = true;
+      GetCards.get(this.currentPage + 1)
+        .then((res) => {
+          if(res.data.length <= 1) {
+            this.noMoreItemToLoad = true;
+          }
+          let newPagination = [...this.cards, ...res.data];
+          this.cards = newPagination;
+          this.filterCards = this.cards;
+          this.loadingTryRequest = false;
+          this.currentPage++;
+        })
+        .catch((err) => (this.loadingTryRequest = false));
     },
   },
   watch: {
@@ -329,7 +351,7 @@ export default {
     },
   },
   mounted() {
-    GetCards.get()
+    GetCards.get(this.currentPage)
       .then((res) => {
         this.requestFailed = false;
         this.cards = res.data;
