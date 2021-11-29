@@ -5,9 +5,14 @@
 ## Como rodar o projeto?
 
 Para rodar o projeto é muito simples, você irá precisar clonar esse repositório e <a href="https://github.com/dFrance/insights_api"> esse aqui </a>. Após essa etapa basta rodar o comandos:
+
+### No repositório insights
 ```
-yarn serve no insights 
-yarn dev no insights_api.
+yarn serve 
+```
+### No repositório insights_api
+```
+yarn dev
 ```
 
 ## Telas entregues pelo UX/UI
