@@ -2,15 +2,47 @@
 
 É uma aplicação que o usuário pode publicar seus insights, suas ideias, com limite de 400 carácteres e podendo adicionar tags para cada ideia.
 
+## Tecnologias utilizadas em todo projeto :
+Esse projeto foi dividido entre o frontend com VueJs e o <a href="https://github.com/dFrance/insights_api">backend com uma api em NodeJs</a>.
+### FrontEnd
+<ul>
+  <li>VueJs</li>
+  <li>Axios</li>
+  <li>Vue Router</li>
+  <li>Vuetify</li>
+  <li>Sass</li>
+  </ul>
+
+### BackEnd
+<ul>
+  <li>NodeJs</li>
+  <li>Express</li>
+  <li>Mongodb</li>
+</ul>
+
 ## Como rodar o projeto?
 
-Para rodar o projeto é muito simples, você irá precisar clonar esse repositório e <a href="https://github.com/dFrance/insights_api"> esse aqui </a>. Após essa etapa basta rodar o comandos:
+Para rodar o projeto é preciso executar as etapas a seguir:
+<ul>
+  <li>Instalar o NodeJs, para baixar <a href="https://nodejs.org/en/download/">clique aqui</a>, caso tenha dúvida de como instalar <a href="https://www.youtube.com/watch?v=HV3gGblB2G4">clique aqui</a></li>
+  <li>Instalar o VueJs <a href="https://www.youtube.com/watch?v=CpzqAzlpq-o">clique aqui</a></li>
+  <li>Instalar o MongoDB <a href="https://www.mongodb.com/try/download/community">clique aqui</a>, baixe a versão MongoDB Community Server. Caso tenha dúvida de como instalar, <a href="https://www.youtube.com/watch?v=r6QM1NTzkTI">clique aqui</a></li>
+  <li>Você irá precisar clonar esse repositório e <a href=> esse aqui </a>. Após essa etapa basta rodar o comandos abaixo </li>
+</ul>
 
 ### No repositório insights
+```
+yarn install
+```
+em seguida
 ```
 yarn serve 
 ```
 ### No repositório insights_api
+```
+yarn install
+```
+em seguida
 ```
 yarn dev
 ```
