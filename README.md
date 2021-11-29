@@ -1,4 +1,6 @@
-# Insights é uma aplicação que o usuário pode publicar seus insights, suas ideias, com limite de 400 carácteres e podendo adicionar tags para cada ideia.
+# Insights 
+
+É uma aplicação que o usuário pode publicar seus insights, suas ideias, com limite de 400 carácteres e podendo adicionar tags para cada ideia.
 
 ## Como rodar o projeto?
 
@@ -16,18 +18,18 @@ yarn dev no insights_api.
 ![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/selected-category.png)
 
 
-## Telas extras para melhorar a experiência do usuário
-
-###Funções extras para da Home
+## Funções extras para melhorar a experiência do usuário
 A ideia dessas funções foi tratar possíveis erros e demonstrar para o usuário por meio de um feedback visual se uma requisição está acontecendo, foi bem sucedida ou gerou uma exeção.
 
+### Funções extras para a Home
+
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-dont-publish-insight.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/feedback-request-connection.png)
 ![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-loading-page.png)
 ![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-dont-exist-insight.png)
 ![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-error-request.png)
-![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-dont-publish-insight.png)
-![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/feedback-request-connection.png)
 
-####Funções extras da publicação de insight
+#### Funções extras da publicação de insight
 
 ![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/publish-insight-feedback-success.png)
 ![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/publish-insight-feedback-error.png)
