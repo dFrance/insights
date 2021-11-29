@@ -1,24 +1,35 @@
-# insights
+# Insights é uma aplicação que o usuário pode publicar seus insights, suas ideias, com limite de 400 carácteres e podendo adicionar tags para cada ideia.
 
-## Project setup
-```
-npm install
-```
+## Como rodar o projeto?
 
-### Compiles and hot-reloads for development
+Para rodar o projeto é muito simples, você irá precisar clonar esse repositório e <a href="https://github.com/dFrance/insights_api"> esse aqui </a>. Após essa etapa basta rodar o comandos:
 ```
-npm run serve
+yarn serve no insights 
+yarn dev no insights_api.
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
+## Telas entregues pelo UX/UI
 
-### Run your unit tests
-```
-npm run test:unit
-```
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/new-insight.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/select-category.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/selected-category.png)
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Telas extras para melhorar a experiência do usuário
+
+###Funções extras para da Home
+A ideia dessas funções foi tratar possíveis erros e demonstrar para o usuário por meio de um feedback visual se uma requisição está acontecendo, foi bem sucedida ou gerou uma exeção.
+
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-loading-page.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-dont-exist-insight.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-error-request.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/home-dont-publish-insight.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/feedback-request-connection.png)
+
+####Funções extras da publicação de insight
+
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/publish-insight-feedback-success.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/publish-insight-feedback-error.png)
+![screenshot](https://github.com/dFrance/insights/blob/master/assets_readme/publish-insight-loading.png)
+
