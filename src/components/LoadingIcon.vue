@@ -14,8 +14,9 @@
 
 .loading-icon {
   color: $color-pink-800 !important;
-  width: 100% !important;
+  /* width: 100% !important; */
   z-index: 9999;
+  margin: 0 auto;
 }
 
 .standard {
