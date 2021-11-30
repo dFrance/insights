@@ -1,7 +1,12 @@
 <template>
   <fragment>
     <header class="header">
-      <LoadingIcon :status="loading" :size="70" :width="7" :loadingPage="true" />
+      <LoadingIcon
+        :status="loading"
+        :size="70"
+        :width="7"
+        :loadingPage="true"
+      />
       <section class="actions">
         <div>
           <img
@@ -13,7 +18,7 @@
         <div>
           <img
             class="avatar"
-            src="https://avatars.githubusercontent.com/u/7530294?s=96&v=4"
+            :src="user.avatar"
             alt=""
           />
         </div>
@@ -24,8 +29,8 @@
         </div>
       </section>
       <section class="info-user">
-        <span class="title">Olá, Antonio!</span>
-        <div class="email">antonio.pina@g.globo</div>
+        <span class="title">Olá, {{user.name}}!</span>
+        <div class="email">{{user.email}}</div>
       </section>
       <section class="sentence-home">
         <hr />
@@ -39,7 +44,7 @@
       <button class="publish-now" v-on:click="tryRequestAgain">
         Reconectar
       </button>
-      <LoadingIcon :status="loadingTryRequest" :size="70" :width="7"/>
+      <LoadingIcon :status="loadingTryRequest" :size="70" :width="7" />
     </div>
     <div
       v-else-if="filterCards && filterCards.length > 0"
@@ -51,11 +56,14 @@
             <div class="text-card-home">
               {{ card.title }}
             </div>
-            <div v-if="card.category.length > 0" class="align-categories">
+            <div
+              v-if="card.category.length > 0 && card.category[0].title !== ''"
+              class="align-categories"
+            >
               <button
                 class="button-category"
                 v-for="category of card.category"
-                :key="category"
+                :key="category.title"
               >
                 {{ category.title }}
               </button>
@@ -75,12 +83,12 @@
       </div>
     </div>
     <div v-else class="container-erro-search-insight">
-      {{cards.length === 0 ?
-      "Você ainda não publicou nenhum insight."
-      :
-      "Você ainda não teve um insight igual a esse."
+      {{
+        cards.length === 0
+          ? "Você ainda não publicou nenhum insight."
+          : "Você ainda não teve um insight igual a esse."
       }}
-      <br/>Que tal publicar um agora?
+      <br />Que tal publicar um agora?
       <button class="publish-now" v-on:click="goNewParams">
         Publicar insight agora
       </button>
@@ -97,6 +105,95 @@
     </div>
   </fragment>
 </template>
+
+<script>
+import GetCards from "../services/requestCards";
+import LoadingIcon from "../components/LoadingIcon";
+
+export default {
+  name: "Home",
+  components: { LoadingIcon },
+  data() {
+    return {
+      user: {name:"Gabriel", email:"emaildogabrieldefranca@gmail.com", avatar:"https://avatars.githubusercontent.com/u/7530294?s=96&v=4"},
+      currentPage: 1,
+      cards: [{ title: "", category: [""] }],
+      filterCards: [],
+      search: "",
+      requestFailed: false,
+      loading: true,
+      loadingTryRequest: false,
+      noMoreItemToLoad: false,
+    };
+  },
+  async mounted() {
+    try {
+      let { data } = await GetCards.get(this.currentPage, 4);
+      this.requestFailed = false;
+      this.cards = data;
+      this.filterCards = data;
+      this.loading = false;
+    } catch (err) {
+      this.loading = false;
+      this.requestFailed = true;
+    }
+  },
+  watch: {
+    search(newValue, oldValue) {
+      let serchComplete = [];
+      serchComplete = this.cards.filter((card) => {
+        let string = JSON.stringify(card.category);
+        return (
+          string.toLowerCase().match(newValue.toLowerCase()) ||
+          card.title.toLowerCase().includes(newValue.toLowerCase())
+        );
+      });
+
+      this.filterCards = serchComplete;
+      return;
+    },
+  },
+  methods: {
+    goNew: function () {
+      this.$router.push("/new");
+      return this.$router.go();
+    },
+    goNewParams: function () {
+      this.$router.push(`/new/${this.search}`);
+      return this.$router.go();
+    },
+    tryRequestAgain: async function () {
+      this.loadingTryRequest = true;
+      try {
+        let { data } = await GetCards.get(this.currentPage + 1, 4);
+        this.cards = data;
+        this.filterCards = data;
+        this.loadingTryRequest = false;
+        this.$router.go();
+      } catch (err) {
+        this.loadingTryRequest = false;
+      }
+    },
+    loadingMoreItems: async function () {
+      this.loadingTryRequest = true;
+      try {
+        let { data } = await GetCards.get(this.currentPage + 1, 4);
+        if(data.length === 0){
+          this.loadingTryRequest = false;
+          return this.noMoreItemToLoad = true;
+        }
+        let newPagination = [...this.cards, ...data];
+        this.cards = newPagination;
+        this.filterCards = this.cards;
+        this.loadingTryRequest = false;
+        this.currentPage++;
+      } catch (error) {
+        this.loadingTryRequest = false;
+      }
+    },
+  },
+};
+</script>
 
 <style lang="scss">
 @import "../styles/style.base.scss";
@@ -259,88 +356,3 @@
   color: $color-gray-900;
 }
 </style>
-
-<script>
-import GetCards from "../services/requestCards";
-import LoadingIcon from "../components/LoadingIcon";
-
-export default {
-  name: "Home",
-  components: { LoadingIcon },
-  data() {
-    return {
-      currentPage: 1,
-      cards: [{ title: "", category: [""] }],
-      filterCards: [],
-      search: "",
-      requestFailed: false,
-      loading: true,
-      loadingTryRequest: false,
-      noMoreItemToLoad: false,
-    };
-  },
-  methods: {
-    goNew: function () {
-      this.$router.push({ path: "/new" });
-      return this.$router.go();
-    },
-    goNewParams: function () {
-      this.$router.push({ path: `/new/${this.search}` });
-      return this.$router.go();
-    },
-    tryRequestAgain: function () {
-      this.loadingTryRequest = true;
-      GetCards.get()
-        .then((res) => {
-          this.cards = res.data;
-          this.filterCards = res.data;
-          this.loadingTryRequest = false;
-          this.$router.go();
-        })
-        .catch((err) => (this.loadingTryRequest = false));
-    },
-    loadingMoreItems: function () {
-      this.loadingTryRequest = true;
-      GetCards.get(this.currentPage + 1, 4)
-        .then((res) => {
-          console.log(res);
-          if (res.data.length <= 3) {
-            this.noMoreItemToLoad = true;
-          }
-          let newPagination = [...this.cards, ...res.data];
-          this.cards = newPagination;
-          this.filterCards = this.cards;
-          this.loadingTryRequest = false;
-          this.currentPage++;
-        })
-        .catch((err) => (this.loadingTryRequest = false));
-    },
-  },
-  watch: {
-    search(newValue, oldValue) {
-      let serchComplete = [];
-      serchComplete = this.cards.filter((card) => {
-        let string = JSON.stringify(card.category);
-        return (
-          string.toLowerCase().match(newValue.toLowerCase()) ||
-          card.title.toLowerCase().includes(newValue.toLowerCase())
-        );
-      });
-
-      this.filterCards = serchComplete;
-      return;
-    },
-  },
-  mounted() {
-    GetCards.get(this.currentPage, 4)
-      .then((res) => {
-        this.requestFailed = false;
-        this.cards = res.data;
-        this.filterCards = res.data;
-        this.loading = false;
-        console.log(res);
-      })
-      .catch(() => (this.loading = false), (this.requestFailed = true));
-  },
-};
-</script>

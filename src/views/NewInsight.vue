@@ -68,7 +68,7 @@
           </div>
         </v-card-text>
       </v-card>
-      <LoadingIcon :status="loadingTryRequest" :size="70" :width="8"/>
+      <LoadingIcon :status="loadingTryRequest" :size="70" :width="8" />
       <v-btn v-if="enableButton" class="btn-publish" v-on:click="publish"
         >Publicar</v-btn
       >
@@ -76,6 +76,93 @@
     </div>
   </fragment>
 </template>
+
+<script>
+import GetCategories from "../services/requestCategory";
+import PostInsight from "../services/requestCards";
+import LoadingIcon from "../components/LoadingIcon";
+
+export default {
+  name: "NewInsight",
+  components: { LoadingIcon },
+  data() {
+    return {
+      insightText: this.$route.params.title || ``,
+      categoriesName: [],
+      categories: [],
+      value: [],
+      loadingTryRequest: false,
+      toaster: { status: false, code: "" },
+      insight: [
+        {
+          insightTitle: "",
+          categories: [{}],
+        },
+      ],
+    };
+  },
+
+  async mounted() {
+    try {
+      let { data } = await GetCategories.get();
+      this.categories = data;
+      console.log(data);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  computed: {
+    enableButton() {
+      return this.insightText !== "" && this.insightText.length <= 400;
+    },
+    toUpperCase() {
+      console.log("entrou");
+      return this.categories.map((cat) => {
+        cat.id, cat.title.toUpperCase();
+      });
+    },
+  },
+  methods: {
+    goHome: function () {
+      this.$router.push("/");
+      return this.$router.go();
+    },
+    async publish() {
+      this.loadingTryRequest = true;
+      let data = { title: this.insightText, category: this.value };
+      try {
+        await PostInsight.post(data);
+        this.insightText = "";
+        this.value = [];
+        this.toaster = {
+          status: true,
+          code: "success",
+          message: "Insight publicado com sucesso!",
+        };
+        setTimeout(() => {
+          this.toaster = { status: false, message: "", code: "" };
+        }, 2500);
+        this.loadingTryRequest = false;
+      } catch (err) {
+        this.toaster = {
+          status: true,
+          code: "error",
+          message: "Ocorreu um problema ao publicar seu insight!",
+        };
+        setTimeout(() => {
+          this.toaster = { status: false, message: "", code: "" };
+        }, 2500);
+        this.loadingTryRequest = false;
+      }
+    },
+    remove(item) {
+      console.log(this.value);
+      this.value.splice(this.value.indexOf(item), 1);
+      this.value = [...this.value];
+    },
+  },
+};
+</script>
 
 <style lang="scss">
 @import "../styles/style.base.scss";
@@ -130,6 +217,10 @@
     font-size: 12px !important;
     color: $color-pink-800 !important;
   }
+  .v-list-item__content,
+  .v-chip__content {
+    text-transform: uppercase;
+  }
   .btn-publish {
     position: absolute;
     bottom: 16px;
@@ -142,79 +233,3 @@
   }
 }
 </style>
-
-<script>
-import GetCategories from "../services/requestCategory";
-import PostInsight from "../services/requestCards";
-import LoadingIcon from "../components/LoadingIcon"
-
-export default {
-  name: "NewInsight",
-  components: {LoadingIcon},
-  data() {
-    return {
-      insightText: this.$route.params.title || ``,
-      categoriesName: [],
-      categories: [],
-      value: [],
-      loadingTryRequest: false,
-      toaster: { status: false, code: "" },
-      insight: [
-        {
-          insightTitle: "",
-          categories: [{}],
-        },
-      ],
-    };
-  },
-  methods: {
-    goHome: function () {
-      this.$router.push({ path: "/" });
-      return this.$router.go();
-    },
-    async publish() {
-      this.loadingTryRequest = true;
-      let data = { title: this.insightText, category: this.value };
-      await PostInsight.post(data)
-        .then(() => {
-          this.insightText = "";
-          this.value = [];
-          this.toaster = {
-            status: true,
-            code: "success",
-            message: "Insight publicado com sucesso!",
-          };
-          setTimeout(() => {
-            this.toaster = { status: false, message: "", code: "" };
-          }, 2500);
-        })
-        .catch(() => {
-          this.toaster = {
-            status: true,
-            code: "error",
-            message: "Ocorreu um problema ao publicar seu insight!",
-          };
-          setTimeout(() => {
-            this.toaster = { status: false, message: "", code: "" };
-          }, 2500);
-        });
-      this.loadingTryRequest = false;
-    },
-    remove(item) {
-      console.log(this.value);
-      this.value.splice(this.value.indexOf(item), 1);
-      this.value = [...this.value];
-    },
-  },
-  computed: {
-    enableButton() {
-      return this.insightText !== "" && this.insightText.length <= 400;
-    },
-  },
-  mounted() {
-    GetCategories.get().then((res) => {
-      this.categories = res.data;
-    });
-  },
-};
-</script>

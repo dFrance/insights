@@ -9,6 +9,28 @@
   </div>
 </template>
 
+
+<script>
+export default {
+  name: "LoadingIcon",
+  props: {
+    status: {
+      type: Boolean,
+      required: true,
+    },
+    size: {
+      type: Number,
+    },
+    width: {
+      type: Number,
+    },
+    loadingPage: {
+      type: Boolean,
+    },
+  },
+};
+</script>
+
 <style lang="scss">
 @import "../styles/style.base.scss";
 
@@ -41,23 +63,3 @@
   align-items: center;
 }
 </style>
-<script>
-export default {
-  name: "LoadingIcon",
-  props: {
-    status: {
-      type: Boolean,
-      required: true,
-    },
-    size: {
-      type: String,
-    },
-    width: {
-      type: String,
-    },
-    loadingPage: {
-      type: Boolean,
-    },
-  },
-};
-</script>
