@@ -54,6 +54,21 @@ Caso tenha instalado o docker (a versão atual ainda não possui a importação 
 ```
 docker-compose up
 ```
+
+### O que está sendo testado e como rodar os testes?
+Os testes estão validando:
+<ul>
+  <li>Se existe conexão com banco de dados</li>
+  <li>Se ao criar uma categoria ela esta com o nome vazio ou com nome de uma categoria existente</li>
+  <li>Se ao criar um insight ele esta com o título vazio, sem um título na categoria, com nome de uma categoria inexistente ou com id da categoria inexistente.</li>
+</ul>
+Se alguma das regras de negócio não forem cumpridas ele retornará um erro.
+
+Para executar os teste é preciso acessar o arquivo connection.js, dentro da pasta config, e alterar a variável uriNuvem para uriTestMock e em seguida executar o comando:
+```
+yarn test
+```
+
 ### Rotas de requisição
 Para cadastro de categorias, ainda não foi criada uma interface visual, contudo a rota /category com o verbo POST é possível cadastrar uma nova categoria, para isso passe um json, como o exemplo abaixo. Para ter acesso as categorias, bastar fazer uma requisição para a mesma rota com o verbo GET, contudo ao ir para a tela de publicação de um novo insight a aplicação consulta o banco e lista automaticamente as opções de tag. 
 ```
